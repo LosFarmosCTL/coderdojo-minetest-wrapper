@@ -5,21 +5,20 @@ mod.neuer_command("test", function()
 end)
 
 
--- 1) Deinen TNT-Cube oder sonstige Logik definieren
+--Macht einen TNT würfel um eine postition
 local function tnt_cube(x, y, z, size)
-    for ix = -size, size do
-        for iy = -size, size do
-            for iz = -size, size do
-                mod.set_block("tnt:tnt_burning", { x = x + ix, y = y + iy, z = z + iz })
-            end
-        end
-    end
+
+     local half = math.floor(size / 2)
+
+    local pos1= {x = x-half, y = y-half, z = z-half}
+    local pos2= {x = x+half, y = y+half, z = z+half}
+    mod.set_blocks("tnt:tnt_burning",pos1,pos2)
 end
 
--- 2) Hook registrieren
+
 mod.pfeil_pos(function(pos)
     -- Testausgabe
     mod.chat(("Einschlag bei %d, %d, %d"):format(pos.x, pos.y, pos.z))
     -- und z.B. TNT-Würfel setzen
-    tnt_cube(pos.x, pos.y, pos.z, 1)
+    tnt_cube(pos.x, pos.y, pos.z, 2)
 end)

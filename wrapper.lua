@@ -35,6 +35,17 @@ function mod.set_block(name, position)
   core.set_node(position, { name = name })
 end
 
+function mod.set_blocks(name, position, position2)
+  for ix = position.x, position2.x do
+        for iy = position.y, position2.y do
+            for iz = position.z, position2.z do
+                mod.set_block(name, { x = ix, y = iy, z = iz })
+            end
+        end
+    end
+end
+
+
 function mod.entferne_block(position, position2)
   if position2 then
     core.delete_area(position, position2)
