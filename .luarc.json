@@ -1,0 +1,9 @@
+{
+    "diagnostics.globals": [
+        "core",
+        "dump"
+    ],
+    "diagnostics.disable": [
+        "lowercase-global"
+    ]
+}
