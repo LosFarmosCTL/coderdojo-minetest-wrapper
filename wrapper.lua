@@ -109,3 +109,102 @@ function mod.setze_geschwindigkeit(speed)
     speed = speed,
   }
 end
+
+-----------------------------------
+------ Neue Items und Blöcke ------
+-----------------------------------
+
+function mod.neues_item(name, picture, callbacks)
+  local item_id = 'coderdojo:' .. name:lower():gsub(' ', '_')
+  local opts = {
+    description = name,
+    inventory_image = picture,
+  }
+
+  if callbacks and callbacks.platzieren then
+    opts.on_place = function(itemstack, placer, pointed_thing)
+      if pointed_thing.type ~= 'node' then
+        return itemstack
+      end
+
+      local remove_item = callbacks.platzieren(pointed_thing.above, placer)
+      if remove_item then
+        itemstack:take_item()
+      end
+
+      return itemstack
+    end
+  end
+
+  if callbacks and callbacks.linksklick then
+    opts.on_use = function(itemstack, user, pointed_thing)
+      if pointed_thing.type ~= 'node' then
+        return itemstack
+      end
+
+      callbacks.linksklick(pointed_thing.under, user)
+
+      return itemstack
+    end
+  end
+
+  if callbacks and callbacks.rechtsklick then
+    opts.on_secondary_use = function(itemstack, user, _)
+      callbacks.rechtsklick(user)
+
+      return itemstack
+    end
+  end
+
+  core.register_craftitem(item_id, opts)
+end
+
+function mod.neuer_block(name, texture, callbacks, one_sided_texture)
+  local block_id = 'coderdojo:' .. name:lower():gsub(' ', '_')
+
+  local opts = {
+    description = name,
+    tiles = {
+      texture .. '^[sheet:6x1:0,0]',
+      texture .. '^[sheet:6x1:1,0]',
+      texture .. '^[sheet:6x1:2,0]',
+      texture .. '^[sheet:6x1:3,0]',
+      texture .. '^[sheet:6x1:4,0]',
+      texture .. '^[sheet:6x1:5,0]',
+    },
+    paramtype2 = 'facedir',
+    on_place = core.rotate_node,
+  }
+
+  if callbacks and callbacks.rechtsklick then
+    opts.on_rightclick = function(pos, _, clicker, itemstack, pointed_thing)
+      if pointed_thing == nil then
+        return
+      end
+
+      callbacks.rechtsklick(pos, clicker, itemstack:get_name())
+    end
+  end
+
+  if callbacks and callbacks.linksklick then
+    opts.on_punch = function(pos, _, puncher, pointed_thing)
+      if pointed_thing == nil then
+        return
+      end
+
+      callbacks.linksklick(pos, puncher)
+    end
+  end
+
+  if callbacks and callbacks.abbauen then
+    opts.on_dig = function(pos, _, digger)
+      callbacks.abbauen(pos, digger)
+    end
+  end
+
+  if one_sided_texture then
+    opts.tiles = { texture }
+  end
+
+  core.register_node(block_id, opts)
+end
