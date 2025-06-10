@@ -1,5 +1,3 @@
--- wrapper.lua
-
 mod = {}
 
 -----------------------------------
@@ -37,14 +35,13 @@ end
 
 function mod.set_blocks(name, position, position2)
   for ix = position.x, position2.x do
-        for iy = position.y, position2.y do
-            for iz = position.z, position2.z do
-                mod.set_block(name, { x = ix, y = iy, z = iz })
-            end
-        end
+    for iy = position.y, position2.y do
+      for iz = position.z, position2.z do
+        mod.set_block(name, { x = ix, y = iy, z = iz })
+      end
     end
+  end
 end
-
 
 function mod.entferne_block(position, position2)
   if position2 then
@@ -222,35 +219,28 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
   core.register_node(block_id, opts)
 end
 
-
-
 -----------------------------------
 ------- Arrow-Hook API -----------
 -----------------------------------
 
---- Registriert einen Callback für jeden Pfeil-Aufprall (on_hit_node).
---- @param fn function(pos: vector, pointed_thing: table, selfObj: table)
 function mod.pfeil_pos(fn)
-  if not XBows or type(XBows.registered_arrows) ~= "table" then
-    minetest.log("warning", "[coderdojo] XBows nicht gefunden – pfeil_pos deaktiviert.")
+  if not XBows or type(XBows.registered_arrows) ~= 'table' then
+    core.log('warning', '[coderdojo] XBows nicht gefunden – pfeil_pos deaktiviert.')
     return
   end
 
   for arrow_name, arrow_def in pairs(XBows.registered_arrows) do
-    -- Bewahre alten Callback, damit wir ihn weiter aufrufen
     local old_hit = arrow_def.custom.on_hit_node
 
-    -- Ersetze durch unsere kombinierte Funktion
     arrow_def.custom.on_hit_node = function(selfObj, pointed_thing)
       local pos = pointed_thing.under
       if pos then
-        -- rufe deinen Wrapper-Callback auf
         fn(pos, pointed_thing, selfObj)
       end
-      -- rufe den alten Hook weiter
       if old_hit then
         old_hit(selfObj, pointed_thing)
       end
     end
   end
 end
+
