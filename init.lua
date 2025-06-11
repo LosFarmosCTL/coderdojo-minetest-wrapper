@@ -1,5 +1,5 @@
-local modname = core.get_current_modname() -- Dies sollte jetzt "coderdojo" sein
-local modpath = core.get_modpath(modname) -- Dies ist der korrekte Pfad zu deinem Mod-Ordner
+local modname = core.get_current_modname()
+local modpath = core.get_modpath(modname)
 
 dofile(modpath .. '/wrapper.lua')
 dofile(modpath .. '/mod.lua')
