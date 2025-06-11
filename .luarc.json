@@ -1,7 +1,8 @@
 {
     "diagnostics.globals": [
         "core",
-        "dump"
+        "dump",
+        "XBows"
     ],
     "diagnostics.disable": [
         "lowercase-global"
