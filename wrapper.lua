@@ -242,22 +242,21 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
 end
 
 -----------------------------------
-------- Arrow-Hook API -----------
+------------ XBows API ------------
 -----------------------------------
 
-function mod.pfeil_pos(fn)
+function mod.pfeil(callback)
   if not XBows or type(XBows.registered_arrows) ~= 'table' then
     core.log('warning', '[coderdojo] XBows nicht gefunden – pfeil_pos deaktiviert.')
     return
   end
 
-  for arrow_name, arrow_def in pairs(XBows.registered_arrows) do
+  for _, arrow_def in pairs(XBows.registered_arrows) do
     local old_hit = arrow_def.custom.on_hit_node
 
     arrow_def.custom.on_hit_node = function(selfObj, pointed_thing)
-      local pos = pointed_thing.under
-      if pos then
-        fn(pos, pointed_thing, selfObj)
+      if pointed_thing.under then
+        callback(pointed_thing.under)
       end
       if old_hit then
         old_hit(selfObj, pointed_thing)
@@ -265,4 +264,3 @@ function mod.pfeil_pos(fn)
     end
   end
 end
-
