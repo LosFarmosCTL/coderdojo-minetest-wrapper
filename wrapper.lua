@@ -33,6 +33,38 @@ function mod.set_block(name, position)
   core.set_node(position, { name = name })
 end
 
+function mod.quader(name, position, position2)
+  for ix = position.x, position2.x do
+    for iy = position.y, position2.y do
+      for iz = position.z, position2.z do
+        mod.set_block(name, { x = ix, y = iy, z = iz })
+      end
+    end
+  end
+end
+
+function mod.wuerfel(name, position, size)
+  local half = math.floor(size / 2)
+
+  local pos1 = { x = position.x - half, y = position.y - half, z = position.z - half }
+  local pos2 = { x = position.x + half, y = position.y + half, z = position.z + half }
+
+  mod.quader(name, pos1, pos2)
+end
+
+function mod.kugel(name, position, radius)
+  local radius_squared = radius * radius
+  for ix = -radius, radius do
+    for iy = -radius, radius do
+      for iz = -radius, radius do
+        if ix * ix + iy * iy + iz * iz <= radius_squared then
+          mod.set_block(name, position:add { x = ix, y = iy, z = iz })
+        end
+      end
+    end
+  end
+end
+
 function mod.entferne_block(position, position2)
   if position2 then
     core.delete_area(position, position2)
@@ -207,4 +239,28 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
   end
 
   core.register_node(block_id, opts)
+end
+
+-----------------------------------
+------------ XBows API ------------
+-----------------------------------
+
+function mod.pfeil(callback)
+  if not XBows or type(XBows.registered_arrows) ~= 'table' then
+    core.log('warning', '[coderdojo] XBows nicht gefunden – pfeil_pos deaktiviert.')
+    return
+  end
+
+  for _, arrow_def in pairs(XBows.registered_arrows) do
+    local old_hit = arrow_def.custom.on_hit_node
+
+    arrow_def.custom.on_hit_node = function(selfObj, pointed_thing)
+      if pointed_thing.under then
+        callback(pointed_thing.under)
+      end
+      if old_hit then
+        old_hit(selfObj, pointed_thing)
+      end
+    end
+  end
 end
