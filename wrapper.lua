@@ -197,12 +197,12 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
   local opts = {
     description = name,
     tiles = {
-      texture .. '^[sheet:6x1:0,0]',
-      texture .. '^[sheet:6x1:1,0]',
-      texture .. '^[sheet:6x1:2,0]',
-      texture .. '^[sheet:6x1:3,0]',
-      texture .. '^[sheet:6x1:4,0]',
-      texture .. '^[sheet:6x1:5,0]',
+      texture .. '^[sheet:6x1:1,0]', -- Top
+      texture .. '^[sheet:6x1:0,0]', -- Bottom
+      texture .. '^[sheet:6x1:4,0]', -- Right
+      texture .. '^[sheet:6x1:5,0]', -- Left
+      texture .. '^[sheet:6x1:2,0]', -- Back
+      texture .. '^[sheet:6x1:3,0]', -- Front
     },
     paramtype2 = 'facedir',
     on_place = core.rotate_node,
