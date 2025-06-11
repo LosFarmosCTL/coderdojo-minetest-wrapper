@@ -206,6 +206,7 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
     },
     paramtype2 = 'facedir',
     on_place = core.rotate_node,
+    groups = { cracky = 3 },
   }
 
   if callbacks and callbacks.rechtsklick then
@@ -229,8 +230,9 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
   end
 
   if callbacks and callbacks.abbauen then
-    opts.on_dig = function(pos, _, digger)
+    opts.on_dig = function(pos, node, digger)
       callbacks.abbauen(pos, digger)
+      core.node_dig(pos, node, digger)
     end
   end
 
