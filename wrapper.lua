@@ -33,11 +33,33 @@ function mod.set_block(name, position)
   core.set_node(position, { name = name })
 end
 
-function mod.set_blocks(name, position, position2)
+function mod.quader(name, position, position2)
   for ix = position.x, position2.x do
     for iy = position.y, position2.y do
       for iz = position.z, position2.z do
         mod.set_block(name, { x = ix, y = iy, z = iz })
+      end
+    end
+  end
+end
+
+function mod.wuerfel(name, position, size)
+  local half = math.floor(size / 2)
+
+  local pos1 = { x = position.x - half, y = position.y - half, z = position.z - half }
+  local pos2 = { x = position.x + half, y = position.y + half, z = position.z + half }
+
+  mod.quader(name, pos1, pos2)
+end
+
+function mod.kugel(name, position, radius)
+  local radius_squared = radius * radius
+  for ix = -radius, radius do
+    for iy = -radius, radius do
+      for iz = -radius, radius do
+        if ix * ix + iy * iy + iz * iz <= radius_squared then
+          mod.set_block(name, position:add { x = ix, y = iy, z = iz })
+        end
       end
     end
   end
