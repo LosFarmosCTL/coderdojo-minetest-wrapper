@@ -170,35 +170,24 @@ function mod.spieler()
   return core.get_player_by_name 'singleplayer'
 end
 
-function mod.setze_schwerkraft(gravity)
-  local player = core.get_player_by_name 'singleplayer'
-  if not player then
-    return
-  end
+function mod.spieler_pos()
+  return mod.spieler():get_pos()
+end
 
-  player:set_physics_override {
+function mod.setze_schwerkraft(gravity)
+  mod.spieler():set_physics_override {
     gravity = gravity,
   }
 end
 
 function mod.setze_sprungkraft(jump_strength)
-  local player = core.get_player_by_name 'singleplayer'
-  if not player then
-    return
-  end
-
-  player:set_physics_override {
+  mod.spieler():set_physics_override {
     jump = jump_strength,
   }
 end
 
 function mod.setze_geschwindigkeit(speed)
-  local player = core.get_player_by_name 'singleplayer'
-  if not player then
-    return
-  end
-
-  player:set_physics_override {
+  mod.spieler():set_physics_override {
     speed = speed,
   }
 end
