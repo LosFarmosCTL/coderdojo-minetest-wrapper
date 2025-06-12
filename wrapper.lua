@@ -8,7 +8,7 @@ function mod.chat(message)
   core.chat_send_all(message)
 end
 
-function mod.neuer_command(name, callback)
+function mod.neuer_befehl(name, callback)
   core.register_chatcommand(name, {
     func = function(_, param)
       local answer = callback(param)
