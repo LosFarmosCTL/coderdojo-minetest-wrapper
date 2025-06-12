@@ -105,32 +105,14 @@ end
 ------- Baum-Wrapper -------------
 -----------------------------------
 
---- Pflanzt an Position (x,y,z) einen Baum.
---- @param x number  Welt-X-Koordinate (Mittelpunkt am Wurzelboden)
---- @param y number  Welt-Y-Koordinate (Bodenhöhe, Stammfuß)
---- @param z number  Welt-Z-Koordinate (Mittelpunkt am Wurzelboden)
---- @param typ string|nil  Baum-Typ:
----      "apple" (Standard),
----      "jungle", "pine",
----      "new_apple", "new_jungle", "new_pine",
----      "acacia", "aspen", "bush", "blueberry", "large_cactus".
---- @return boolean   true bei Erfolg, false sonst
-function mod.baum(x, y, z, typ)
-  -- Table mit allen Grow-Funktionen aus default/trees.lua
-  local growers = {
-    apple = function(pos)
-      default.grow_tree(pos, true)
-    end,
-    tree = function(pos)
-      default.grow_tree(pos, false)
-    end,
+function mod.baum(pos, typ)
+  -- stylua: ignore
+  local generators = {
+    apple = function(p) default.grow_tree(p, true) end,
+    tree = function(p) default.grow_tree(p, false) end,
     jungle = default.grow_jungle_tree,
-    pine = function(pos)
-      default.grow_pine_tree(pos, false)
-    end,
-    snowy_pine = function(pos)
-      default.grow_pine_tree(pos, true)
-    end,
+    pine = function(p) default.grow_pine_tree(p, false) end,
+    snowy_pine = function(p) default.grow_pine_tree(p, true) end,
     new_apple = default.grow_new_apple_tree,
     new_jungle = default.grow_new_jungle_tree,
     new_emergent = default.grow_new_emergent_jungle_tree,
@@ -143,29 +125,16 @@ function mod.baum(x, y, z, typ)
     large_cactus = default.grow_large_cactus,
   }
 
-  local pos = { x = x, y = y, z = z }
-  local fn
+  local tree_generator
+  -- stylua: ignore
+  if typ == nil then tree_generator = generators.apple
+  else tree_generator = generators[typ] end
 
-  if typ == nil or typ == 'apple' or typ == 'tree' then
-    fn = growers.apple
-  else
-    fn = growers[typ]
-  end
-
-  if not fn then
+  if not tree_generator then
     mod.chat("Baumtyp '" .. tostring(typ) .. "' unbekannt!")
-    return false
   end
 
-  -- Schutz prüfen
-  if minetest.is_protected(pos, '') then
-    mod.chat('Baum an (' .. x .. ',' .. y .. ',' .. z .. ') ist geschützt!')
-    return false
-  end
-
-  -- Plant den Baum
-  fn(pos)
-  return true
+  tree_generator(pos)
 end
 
 -----------------------------------
