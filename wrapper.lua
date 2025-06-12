@@ -266,3 +266,24 @@ function mod.pfeil(callback)
     end
   end
 end
+
+------------------------------------
+---------- Global Timer ------------
+------------------------------------
+
+function mod.timer(interval, callback)
+  if type(interval) ~= 'number' or interval <= 0 then
+    core.log('error', '[coderdojo] Ungültiges Intervall für mod.timer: ' .. tostring(interval))
+    return
+  end
+
+  local time_elapsed = 0
+  core.register_globalstep(function(deltatime)
+    time_elapsed = time_elapsed + deltatime
+
+    if time_elapsed >= interval then
+      callback()
+      time_elapsed = 0
+    end
+  end)
+end
