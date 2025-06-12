@@ -8,6 +8,23 @@ function each(list)
   end
 end
 
+math.randomseed(os.time())
+function zufall(min, max)
+  if type(min) == 'table' then
+    return min[math.random(1, #min)]
+  end
+
+  if not min or not max then
+    return math.random()
+  end
+
+  if min > max then
+    min, max = max, min
+  end
+
+  return math.random(min, max)
+end
+
 -----------------------------------
 -------------- Chat ---------------
 -----------------------------------
