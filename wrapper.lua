@@ -102,6 +102,65 @@ function mod.finde_bloecke(position, distance, block_name)
 end
 
 -----------------------------------
+------- Baum-Wrapper -------------
+-----------------------------------
+
+--- Pflanzt an Position (x,y,z) einen Baum.
+--- @param x number  Welt-X-Koordinate (Mittelpunkt am Wurzelboden)
+--- @param y number  Welt-Y-Koordinate (Bodenhöhe, Stammfuß)
+--- @param z number  Welt-Z-Koordinate (Mittelpunkt am Wurzelboden)
+--- @param typ string|nil  Baum-Typ:
+---      "apple" (Standard),
+---      "jungle", "pine",
+---      "new_apple", "new_jungle", "new_pine",
+---      "acacia", "aspen", "bush", "blueberry", "large_cactus".
+--- @return boolean   true bei Erfolg, false sonst
+function mod.baum(x, y, z, typ)
+  -- Table mit allen Grow-Funktionen aus default/trees.lua
+  local growers = {
+    apple          = function(pos) default.grow_tree(pos, true) end,
+    tree           = function(pos) default.grow_tree(pos, false) end,
+    jungle         = default.grow_jungle_tree,
+    pine           = function(pos) default.grow_pine_tree(pos, false) end,
+    snowy_pine     = function(pos) default.grow_pine_tree(pos, true) end,
+    new_apple      = default.grow_new_apple_tree,
+    new_jungle     = default.grow_new_jungle_tree,
+    new_emergent   = default.grow_new_emergent_jungle_tree,
+    new_pine       = default.grow_new_pine_tree,
+    new_snowy_pine = default.grow_new_snowy_pine_tree,
+    acacia         = default.grow_new_acacia_tree,
+    aspen          = default.grow_new_aspen_tree,
+    bush           = default.grow_bush,
+    blueberry      = default.grow_blueberry_bush,
+    large_cactus   = default.grow_large_cactus,
+  }
+
+  local pos = { x = x, y = y, z = z }
+  local fn
+
+  if typ == nil or typ == "apple" or typ == "tree" then
+    fn = growers.apple
+  else
+    fn = growers[typ]
+  end
+
+  if not fn then
+    mod.chat("Baumtyp '" .. tostring(typ) .. "' unbekannt!")
+    return false
+  end
+
+  -- Schutz prüfen
+  if minetest.is_protected(pos, "") then
+    mod.chat("Baum an (" .. x .. "," .. y .. "," .. z .. ") ist geschützt!")
+    return false
+  end
+
+  -- Plant den Baum
+  fn(pos)
+  return true
+end
+
+-----------------------------------
 ------- Spieler und Physik --------
 -----------------------------------
 
@@ -242,6 +301,47 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
 end
 
 -----------------------------------
+--- Zeit‐/Frame‐Callback (Globalstep) ---
+-----------------------------------
+
+--- Registriert eine Funktion, die bei jedem Server-Tick aufgerufen wird.
+--- @param fn function(dtime: number)
+---        dtime = Zeit seit dem letzten Aufruf in Sekunden
+function mod.jedes_tick(fn)
+  assert(type(fn) == "function", "mod.jedes_tick erwartet eine Funktion als Parameter")
+  minetest.register_globalstep(fn)
+end
+
+-----------------------------------
+--------- Partikel effect ---------
+-----------------------------------
+
+
+--- Spawnt einen Partikel‐Effekt um die gegebene Position.
+--- @param pos vector  {x=…,y=…,z=…}
+--- @param texture string  Name der Partikel‐Textur
+--- @param count number  Anzahl der Partikel
+function mod.spawn_partikel(pos, texture, count)
+  count = count or 100
+  minetest.add_particlespawner({
+    amount = count,
+    time = 0.5,
+    minpos = vector.subtract(pos, { x = 1, y = 1, z = 1 }),
+    maxpos = vector.add(pos, { x = 1, y = 1, z = 1 }),
+    minvel = { x = 0, y = 0, z = 0 },
+    maxvel = { x = 1, y = 1, z = 1 },
+    minacc = { x = 0, y = 0, z = 0 },
+    maxacc = { x = 2, y = 2, z = 2 },
+    minexptime = 1,
+    maxexptime = 2,
+    minsize = 1,
+    maxsize = 2,
+    collisiondetection = true,
+    texture = texture,
+  })
+end
+
+-----------------------------------
 ------------ XBows API ------------
 -----------------------------------
 
@@ -262,5 +362,65 @@ function mod.pfeil(callback)
         old_hit(selfObj, pointed_thing)
       end
     end
+  end
+end
+
+-----------------------------------
+------- Projektil‐Wrapper ---------
+-----------------------------------
+
+--- Erstellt einen Rechtsklick‐Callback, der ein Partikel‐Projektil abfeuert
+--- und bei jedem Schritt deine Funktion mit den Koordinaten aufruft.
+---
+--- @param particle string   Partikel‐Texture, z.B. "bubble.png"
+--- @param delay    number   Zeit in Sekunden zwischen den Schritten (z.B. 0.1)
+--- @param range    number   maximale Reichweite in Blöcken (z.B. 100)
+--- @param cb       function(pos:table)   Wird aufgerufen mit {x=..,y=..,z=..}
+--- @return function(player:ObjectRef):boolean
+function mod.projektil(particle, delay, range, cb)
+  delay = delay or 0.1
+  range = range or 100
+  assert(type(cb) == "function", "mod.projektil: letzter Parameter muss eine Funktion sein")
+
+  return function(player)
+    local ppos = player:get_pos()
+    if not ppos then
+      mod.chat("Kein Spieler gefunden!")
+      return false
+    end
+
+    local dir = player:get_look_dir()
+    local step_dist = 1
+
+    local function step(i)
+      -- berechne Block‐Position in Blickrichtung
+      local pos = {
+        x = math.floor(ppos.x + dir.x * i + 0.5),
+        y = math.floor(ppos.y + 1 + dir.y * i + 0.5),
+        z = math.floor(ppos.z + dir.z * i + 0.5),
+      }
+
+      -- spawn Partikel
+      mod.spawn_partikel(pos, particle, 20)
+
+      -- rufe deinen Callback auf
+      cb(pos)
+
+      -- prüfe, ob Luft oder nicht
+      local node = mod.get_block(pos).name
+      if node ~= "air" and node ~= "default:air" then
+        -- Abbruch: kein weiterer Schritt
+        return
+      end
+
+      -- sonst nächsten Schritt planen
+      if i + step_dist <= range then
+        minetest.after(delay, function() step(i + step_dist) end)
+      end
+    end
+
+    -- Starte bei i=1
+    step(1)
+    return false -- Item bleibt im Inventar
   end
 end
