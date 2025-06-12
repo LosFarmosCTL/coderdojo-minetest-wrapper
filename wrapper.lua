@@ -102,6 +102,42 @@ function mod.finde_bloecke(position, distance, block_name)
 end
 
 -----------------------------------
+------- Baum-Wrapper -------------
+-----------------------------------
+
+function mod.baum(pos, typ)
+  -- stylua: ignore
+  local generators = {
+    apple = function(p) default.grow_tree(p, true) end,
+    tree = function(p) default.grow_tree(p, false) end,
+    jungle = default.grow_jungle_tree,
+    pine = function(p) default.grow_pine_tree(p, false) end,
+    snowy_pine = function(p) default.grow_pine_tree(p, true) end,
+    new_apple = default.grow_new_apple_tree,
+    new_jungle = default.grow_new_jungle_tree,
+    new_emergent = default.grow_new_emergent_jungle_tree,
+    new_pine = default.grow_new_pine_tree,
+    new_snowy_pine = default.grow_new_snowy_pine_tree,
+    acacia = default.grow_new_acacia_tree,
+    aspen = default.grow_new_aspen_tree,
+    bush = default.grow_bush,
+    blueberry = default.grow_blueberry_bush,
+    large_cactus = default.grow_large_cactus,
+  }
+
+  local tree_generator
+  -- stylua: ignore
+  if typ == nil then tree_generator = generators.apple
+  else tree_generator = generators[typ] end
+
+  if not tree_generator then
+    mod.chat("Baumtyp '" .. tostring(typ) .. "' unbekannt!")
+  end
+
+  tree_generator(pos)
+end
+
+-----------------------------------
 ------- Spieler und Physik --------
 -----------------------------------
 
@@ -265,6 +301,64 @@ function mod.pfeil(callback)
       end
     end
   end
+end
+
+-----------------------------------
+-------- Particle effects ---------
+-----------------------------------
+
+function mod.partikel(pos, texture, count)
+  count = count or 100
+  core.add_particlespawner {
+    amount = count,
+    time = 0.5,
+    minpos = pos:subtract { x = 1, y = 1, z = 1 },
+    maxpos = pos:add { x = 1, y = 1, z = 1 },
+    minvel = { x = 0, y = 0, z = 0 },
+    maxvel = { x = 1, y = 1, z = 1 },
+    minacc = { x = 0, y = 0, z = 0 },
+    maxacc = { x = 2, y = 2, z = 2 },
+    minexptime = 1,
+    maxexptime = 2,
+    minsize = 1,
+    maxsize = 2,
+    collisiondetection = true,
+    texture = texture,
+  }
+end
+
+-----------------------------------
+------- Projektil‐Wrapper ---------
+-----------------------------------
+
+function mod.projektil(particle_texture, delay, range, callback)
+  local player = mod.spieler()
+  local ppos = player:get_pos()
+  local dir = player:get_look_dir()
+  local step_dist = 1
+
+  local function step(i)
+    local x = math.floor(ppos.x + dir.x * i + 0.5)
+    local y = math.floor(ppos.y + 1 + dir.y * i + 0.5)
+    local z = math.floor(ppos.z + dir.z * i + 0.5)
+    local pos = vector.new(x, y, z)
+
+    mod.partikel(pos, particle_texture, 20)
+
+    local node = mod.get_block(pos).name
+    if node ~= 'air' and node ~= 'default:air' then
+      callback(pos)
+      return
+    end
+
+    if i + step_dist <= range then
+      core.after(delay, function()
+        step(i + step_dist)
+      end)
+    end
+  end
+
+  step(1)
 end
 
 ------------------------------------
