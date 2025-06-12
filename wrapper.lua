@@ -1,5 +1,13 @@
 mod = {}
 
+function each(list)
+  local i = 0
+  return function()
+    i = i + 1
+    return list[i]
+  end
+end
+
 -----------------------------------
 -------------- Chat ---------------
 -----------------------------------
