@@ -3,7 +3,8 @@
         "core",
         "dump",
         "XBows",
-        "default"
+        "default",
+        "vector"
     ],
     "diagnostics.disable": [
         "lowercase-global"

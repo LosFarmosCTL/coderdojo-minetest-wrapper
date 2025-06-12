@@ -280,46 +280,6 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
 end
 
 -----------------------------------
---- Zeit‐/Frame‐Callback (Globalstep) ---
------------------------------------
-
---- Registriert eine Funktion, die bei jedem Server-Tick aufgerufen wird.
---- @param fn function(dtime: number)
----        dtime = Zeit seit dem letzten Aufruf in Sekunden
-function mod.jedes_tick(fn)
-  assert(type(fn) == 'function', 'mod.jedes_tick erwartet eine Funktion als Parameter')
-  minetest.register_globalstep(fn)
-end
-
------------------------------------
---------- Partikel effect ---------
------------------------------------
-
---- Spawnt einen Partikel‐Effekt um die gegebene Position.
---- @param pos vector  {x=…,y=…,z=…}
---- @param texture string  Name der Partikel‐Textur
---- @param count number  Anzahl der Partikel
-function mod.spawn_partikel(pos, texture, count)
-  count = count or 100
-  minetest.add_particlespawner {
-    amount = count,
-    time = 0.5,
-    minpos = vector.subtract(pos, { x = 1, y = 1, z = 1 }),
-    maxpos = vector.add(pos, { x = 1, y = 1, z = 1 }),
-    minvel = { x = 0, y = 0, z = 0 },
-    maxvel = { x = 1, y = 1, z = 1 },
-    minacc = { x = 0, y = 0, z = 0 },
-    maxacc = { x = 2, y = 2, z = 2 },
-    minexptime = 1,
-    maxexptime = 2,
-    minsize = 1,
-    maxsize = 2,
-    collisiondetection = true,
-    texture = texture,
-  }
-end
-
------------------------------------
 ------------ XBows API ------------
 -----------------------------------
 
@@ -344,65 +304,61 @@ function mod.pfeil(callback)
 end
 
 -----------------------------------
+-------- Particle effects ---------
+-----------------------------------
+
+function mod.partikel(pos, texture, count)
+  count = count or 100
+  core.add_particlespawner {
+    amount = count,
+    time = 0.5,
+    minpos = pos:subtract { x = 1, y = 1, z = 1 },
+    maxpos = pos:add { x = 1, y = 1, z = 1 },
+    minvel = { x = 0, y = 0, z = 0 },
+    maxvel = { x = 1, y = 1, z = 1 },
+    minacc = { x = 0, y = 0, z = 0 },
+    maxacc = { x = 2, y = 2, z = 2 },
+    minexptime = 1,
+    maxexptime = 2,
+    minsize = 1,
+    maxsize = 2,
+    collisiondetection = true,
+    texture = texture,
+  }
+end
+
+-----------------------------------
 ------- Projektil‐Wrapper ---------
 -----------------------------------
 
---- Erstellt einen Rechtsklick‐Callback, der ein Partikel‐Projektil abfeuert
---- und bei jedem Schritt deine Funktion mit den Koordinaten aufruft.
----
---- @param particle string   Partikel‐Texture, z.B. "bubble.png"
---- @param delay    number   Zeit in Sekunden zwischen den Schritten (z.B. 0.1)
---- @param range    number   maximale Reichweite in Blöcken (z.B. 100)
---- @param cb       function(pos:table)   Wird aufgerufen mit {x=..,y=..,z=..}
---- @return function(player:ObjectRef):boolean
-function mod.projektil(particle, delay, range, cb)
-  delay = delay or 0.1
-  range = range or 100
-  assert(type(cb) == 'function', 'mod.projektil: letzter Parameter muss eine Funktion sein')
+function mod.projektil(particle_texture, delay, range, callback)
+  local player = mod.spieler()
+  local ppos = player:get_pos()
+  local dir = player:get_look_dir()
+  local step_dist = 1
 
-  return function(player)
-    local ppos = player:get_pos()
-    if not ppos then
-      mod.chat 'Kein Spieler gefunden!'
-      return false
+  local function step(i)
+    local x = math.floor(ppos.x + dir.x * i + 0.5)
+    local y = math.floor(ppos.y + 1 + dir.y * i + 0.5)
+    local z = math.floor(ppos.z + dir.z * i + 0.5)
+    local pos = vector.new(x, y, z)
+
+    mod.partikel(pos, particle_texture, 20)
+
+    local node = mod.get_block(pos).name
+    if node ~= 'air' and node ~= 'default:air' then
+      callback(pos)
+      return
     end
 
-    local dir = player:get_look_dir()
-    local step_dist = 1
-
-    local function step(i)
-      -- berechne Block‐Position in Blickrichtung
-      local pos = {
-        x = math.floor(ppos.x + dir.x * i + 0.5),
-        y = math.floor(ppos.y + 1 + dir.y * i + 0.5),
-        z = math.floor(ppos.z + dir.z * i + 0.5),
-      }
-
-      -- spawn Partikel
-      mod.spawn_partikel(pos, particle, 20)
-
-      -- rufe deinen Callback auf
-      cb(pos)
-
-      -- prüfe, ob Luft oder nicht
-      local node = mod.get_block(pos).name
-      if node ~= 'air' and node ~= 'default:air' then
-        -- Abbruch: kein weiterer Schritt
-        return
-      end
-
-      -- sonst nächsten Schritt planen
-      if i + step_dist <= range then
-        minetest.after(delay, function()
-          step(i + step_dist)
-        end)
-      end
+    if i + step_dist <= range then
+      core.after(delay, function()
+        step(i + step_dist)
+      end)
     end
-
-    -- Starte bei i=1
-    step(1)
-    return false -- Item bleibt im Inventar
   end
+
+  step(1)
 end
 
 ------------------------------------
