@@ -30,7 +30,7 @@ end
 -----------------------------------
 
 function mod.chat(message)
-  core.chat_send_all(message)
+  core.chat_send_all(dump(message))
 end
 
 function mod.neuer_befehl(name, callback)
