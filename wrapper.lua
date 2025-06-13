@@ -183,6 +183,11 @@ function mod.spieler_pos()
   return mod.spieler():get_pos()
 end
 
+function mod.teleportiere_spieler(pos)
+  local player = mod.spieler()
+  player:set_pos(pos)
+end
+
 function mod.setze_schwerkraft(gravity)
   mod.spieler():set_physics_override {
     gravity = gravity,
