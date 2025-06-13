@@ -66,11 +66,15 @@ function mod.set_block(name, position)
   core.set_node(position, { name = name })
 end
 
-function mod.quader(name, position, position2)
-  for ix = position.x, position2.x do
-    for iy = position.y, position2.y do
-      for iz = position.z, position2.z do
-        mod.set_block(name, { x = ix, y = iy, z = iz })
+function mod.setze_bereich(block_name, pos, pos2)
+  local min_x, max_x = math.min(pos.x, pos2.x), math.max(pos.x, pos2.x)
+  local min_y, max_y = math.min(pos.y, pos2.y), math.max(pos.y, pos2.y)
+  local min_z, max_z = math.min(pos.z, pos2.z), math.max(pos.z, pos2.z)
+
+  for ix = min_x, max_x do
+    for iy = min_y, max_y do
+      for iz = min_z, max_z do
+        core.set_node({ x = ix, y = iy, z = iz }, { name = block_name })
       end
     end
   end
