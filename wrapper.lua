@@ -63,7 +63,7 @@ end
 -----------------------------------
 
 function mod.lese_block(pos)
-  return core.get_node(pos)
+  return core.get_node(pos).name
 end
 
 function mod.setze_block(block_name, pos)
