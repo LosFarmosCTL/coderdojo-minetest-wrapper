@@ -34,7 +34,11 @@ end
 -----------------------------------
 
 function mod.chat(message)
-  core.chat_send_all(dump(message))
+  if type(message) ~= 'string' then
+    message = dump(message)
+  end
+
+  core.chat_send_all(message)
 end
 
 function mod.neuer_befehl(name, callback)
