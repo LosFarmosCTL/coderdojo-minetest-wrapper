@@ -142,33 +142,30 @@ end
 ------- Baum-Wrapper -------------
 -----------------------------------
 
-function mod.baum(pos, typ)
+function mod.baum(pos, type)
   -- stylua: ignore
   local generators = {
-    apple = function(p) default.grow_tree(p, true) end,
-    tree = function(p) default.grow_tree(p, false) end,
-    jungle = default.grow_jungle_tree,
-    pine = function(p) default.grow_pine_tree(p, false) end,
-    snowy_pine = function(p) default.grow_pine_tree(p, true) end,
-    new_apple = default.grow_new_apple_tree,
-    new_jungle = default.grow_new_jungle_tree,
-    new_emergent = default.grow_new_emergent_jungle_tree,
-    new_pine = default.grow_new_pine_tree,
-    new_snowy_pine = default.grow_new_snowy_pine_tree,
-    acacia = default.grow_new_acacia_tree,
-    aspen = default.grow_new_aspen_tree,
-    bush = default.grow_bush,
-    blueberry = default.grow_blueberry_bush,
-    large_cactus = default.grow_large_cactus,
+    baum          = function(p) default.grow_tree(p, false) end,
+    apfel         = default.grow_new_apple_tree,
+    dschungel     = default.grow_new_jungle_tree,
+    urwaldriese   = default.grow_new_emergent_jungle_tree,
+    tanne         = default.grow_new_pine_tree,
+    schneetanne   = default.grow_new_snowy_pine_tree,
+    akazie        = default.grow_new_acacia_tree,
+    espe          = default.grow_new_aspen_tree,
+    busch         = default.grow_bush,
+    blaubeerbusch = default.grow_blueberry_bush,
+    riesenkaktus  = default.grow_large_cactus,
   }
 
   local tree_generator
   -- stylua: ignore
-  if typ == nil then tree_generator = generators.apple
-  else tree_generator = generators[typ] end
+  if type == nil then tree_generator = generators.baum
+  else tree_generator = generators[type:lower()] end
 
   if not tree_generator then
-    mod.chat("Baumtyp '" .. tostring(typ) .. "' unbekannt!")
+    mod.chat("Baumtyp '" .. type .. "' unbekannt!")
+    return
   end
 
   tree_generator(pos)
