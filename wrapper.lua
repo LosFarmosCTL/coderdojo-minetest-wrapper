@@ -215,7 +215,7 @@ end
 -----------------------------------
 
 function mod.neues_item(item_name, texture, callbacks)
-  local item_id = 'dojo:' .. item_name:lower():gsub(' ', '_')
+  local item_id = 'coderdojo:' .. item_name:lower():gsub(' ', '_')
   local opts = {
     description = item_name,
     inventory_image = texture,
@@ -260,7 +260,7 @@ function mod.neues_item(item_name, texture, callbacks)
 end
 
 function mod.neuer_block(block_name, texture, callbacks, one_sided_texture)
-  local block_id = 'dojo:' .. block_name:lower():gsub(' ', '_')
+  local block_id = 'coderdojo:' .. block_name:lower():gsub(' ', '_')
 
   local opts = {
     description = block_name,
