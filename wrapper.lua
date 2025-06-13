@@ -25,6 +25,10 @@ function zufall(min, max)
   return math.random(min, max)
 end
 
+function warte(seconds, callback)
+  core.after(seconds, callback)
+end
+
 function mod.position(x, y, z)
   return vector.new(x, y, z)
 end
