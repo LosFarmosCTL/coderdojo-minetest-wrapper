@@ -1,4 +1,4 @@
-## CoderDojo Minetest: Dein Spickzettel
+# CoderDojo Minetest: Dein Spickzettel
 
 Mit diesem Spickzettel lernst du, wie du deine eigene Minetest-Welt mit Code verändern kannst!
 
@@ -9,7 +9,7 @@ Als erstes kurz einmal die wichtigsten Tasten, die du in Luanti brauchen wirst:
 - Inventar öffnen: I
 - Pause-Menü: ESC
 
-### Die Grundlagen von Lua
+## Die Grundlagen von Lua
 
 Bevor wir loslegen, hier ein paar ganz wichtige Dinge:
 
@@ -86,11 +86,11 @@ Bevor wir loslegen, hier ein paar ganz wichtige Dinge:
 
 ---
 
-### Alle Befehle im Überblick
+## Alle Befehle im Überblick
 
 Hier sind alle Befehle, die du benutzen kannst. Zu jedem gibt es eine Erklärung und ein Beispiel zum Ausprobieren.
 
-#### Chat & Chat-Befehle
+### Chat & Chat-Befehle
 
 **`mod.chat(nachricht)`**
 
@@ -118,7 +118,7 @@ Hier sind alle Befehle, die du benutzen kannst. Zu jedem gibt es eine Erklärung
 
 ---
 
-#### Welt bearbeiten
+### Welt bearbeiten
 
 **`mod.setze_block(block_name, position)`**
 
@@ -197,7 +197,7 @@ Hier sind alle Befehle, die du benutzen kannst. Zu jedem gibt es eine Erklärung
 
 ---
 
-#### Dinge finden & untersuchen
+### Dinge finden & untersuchen
 
 **`mod.lese_block(position)`**
 
@@ -335,7 +335,7 @@ Das ist der spannendste Teil! Hier kannst du deine eigenen Blöcke und Gegenstä
 
 ---
 
-#### Spieler & Physik
+### Spieler & Physik
 
 **`mod.spieler_pos()`**
 
@@ -394,7 +394,7 @@ Das ist der spannendste Teil! Hier kannst du deine eigenen Blöcke und Gegenstä
 
 ---
 
-#### Besondere Effekte
+### Besondere Effekte
 
 **`mod.partikel(position, bild, anzahl, reichweite)`**
 
