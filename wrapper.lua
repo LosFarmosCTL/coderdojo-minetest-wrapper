@@ -25,7 +25,7 @@ function zufall(min, max)
   return math.random(min, max)
 end
 
-function position(x, y, z)
+function mod.position(x, y, z)
   return vector.new(x, y, z)
 end
 
