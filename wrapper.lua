@@ -58,12 +58,12 @@ end
 ---------- World editing ----------
 -----------------------------------
 
-function mod.get_block(position)
-  return core.get_node(position)
+function mod.lese_block(pos)
+  return core.get_node(pos)
 end
 
-function mod.set_block(name, position)
-  core.set_node(position, { name = name })
+function mod.setze_block(block_name, pos)
+  core.set_node(pos, { name = block_name })
 end
 
 function mod.setze_bereich(block_name, pos, pos2)
@@ -80,56 +80,56 @@ function mod.setze_bereich(block_name, pos, pos2)
   end
 end
 
-function mod.wuerfel(name, position, size)
+function mod.wuerfel(block_name, pos, size)
   local half = math.floor(size / 2)
 
-  local pos1 = { x = position.x - half, y = position.y - half, z = position.z - half }
-  local pos2 = { x = position.x + half, y = position.y + half, z = position.z + half }
+  local pos1 = { x = pos.x - half, y = pos.y - half, z = pos.z - half }
+  local pos2 = { x = pos.x + half, y = pos.y + half, z = pos.z + half }
 
-  mod.quader(name, pos1, pos2)
+  mod.setze_bereich(block_name, pos1, pos2)
 end
 
-function mod.kugel(name, position, radius)
+function mod.kugel(block_name, pos, radius)
   local radius_squared = radius * radius
   for ix = -radius, radius do
     for iy = -radius, radius do
       for iz = -radius, radius do
         if ix * ix + iy * iy + iz * iz <= radius_squared then
-          mod.set_block(name, position:add { x = ix, y = iy, z = iz })
+          core.set_node(pos:add { x = ix, y = iy, z = iz }, { name = block_name })
         end
       end
     end
   end
 end
 
-function mod.entferne_block(position, position2)
-  if position2 then
-    core.delete_area(position, position2)
-  else
-    core.remove_node(position)
-  end
+function mod.entferne_block(pos)
+  core.remove_node(pos)
 end
 
-function mod.finde_block(position, distance, block_name)
+function mod.entferne_bereich(pos, pos2)
+  core.delete_area(pos, pos2)
+end
+
+function mod.finde_block(pos, distance, block_name)
   if type(block_name) == 'string' then
     block_name = { block_name }
   end
 
-  return core.find_node_near(position, distance, block_name)
+  return core.find_node_near(pos, distance, block_name)
 end
 
-function mod.finde_bloecke(position, distance, block_name)
+function mod.finde_bloecke(pos, distance, block_name)
   if type(block_name) == 'string' then
     block_name = { block_name }
   end
 
-  local pos1 = position:subtract { x = distance, y = distance, z = distance }
-  local pos2 = position:add { x = distance, y = distance, z = distance }
+  local pos1 = pos:subtract { x = distance, y = distance, z = distance }
+  local pos2 = pos:add { x = distance, y = distance, z = distance }
   local found_nodes = core.find_nodes_in_area(pos1, pos2, block_name)
 
   local filtered_nodes = {}
   for _, node in ipairs(found_nodes) do
-    local delta = node:subtract(position)
+    local delta = node:subtract(pos)
     if delta.x * delta.x + delta.y * delta.y + delta.z * delta.z <= distance * distance then
       table.insert(filtered_nodes, node)
     end
@@ -210,11 +210,11 @@ end
 ------ Neue Items und Blöcke ------
 -----------------------------------
 
-function mod.neues_item(name, picture, callbacks)
-  local item_id = 'coderdojo:' .. name:lower():gsub(' ', '_')
+function mod.neues_item(item_name, texture, callbacks)
+  local item_id = 'dojo:' .. item_name:lower():gsub(' ', '_')
   local opts = {
-    description = name,
-    inventory_image = picture,
+    description = item_name,
+    inventory_image = texture,
   }
 
   if callbacks and callbacks.platzieren then
@@ -255,11 +255,11 @@ function mod.neues_item(name, picture, callbacks)
   core.register_craftitem(item_id, opts)
 end
 
-function mod.neuer_block(name, texture, callbacks, one_sided_texture)
-  local block_id = 'coderdojo:' .. name:lower():gsub(' ', '_')
+function mod.neuer_block(block_name, texture, callbacks, one_sided_texture)
+  local block_id = 'dojo:' .. block_name:lower():gsub(' ', '_')
 
   local opts = {
-    description = name,
+    description = block_name,
     tiles = {
       texture .. '^[sheet:6x1:1,0]', -- Top
       texture .. '^[sheet:6x1:0,0]', -- Bottom
@@ -274,12 +274,12 @@ function mod.neuer_block(name, texture, callbacks, one_sided_texture)
   }
 
   if callbacks and callbacks.rechtsklick then
-    opts.on_rightclick = function(pos, _, clicker, itemstack, pointed_thing)
+    opts.on_rightclick = function(pos, _, _, pointed_thing)
       if pointed_thing == nil then
         return
       end
 
-      callbacks.rechtsklick(pos, clicker, itemstack:get_name())
+      callbacks.rechtsklick(pos)
     end
   end
 
@@ -313,7 +313,7 @@ end
 
 function mod.pfeil(callback)
   if not XBows or type(XBows.registered_arrows) ~= 'table' then
-    core.log('warning', '[coderdojo] XBows nicht gefunden – pfeil_pos deaktiviert.')
+    core.log('warning', '[dojo] XBows nicht gefunden – pfeil_pos deaktiviert.')
     return
   end
 
@@ -335,13 +335,14 @@ end
 -------- Particle effects ---------
 -----------------------------------
 
-function mod.partikel(pos, texture, count)
-  count = count or 100
+function mod.partikel(pos, texture, amount, range)
+  range = range or 1
+
   core.add_particlespawner {
-    amount = count,
+    amount = amount,
     time = 0.5,
-    minpos = pos:subtract { x = 1, y = 1, z = 1 },
-    maxpos = pos:add { x = 1, y = 1, z = 1 },
+    minpos = pos:subtract { x = range, y = range, z = range },
+    maxpos = pos:add { x = range, y = range, z = range },
     minvel = { x = 0, y = 0, z = 0 },
     maxvel = { x = 1, y = 1, z = 1 },
     minacc = { x = 0, y = 0, z = 0 },
@@ -359,7 +360,10 @@ end
 ------- Projektil‐Wrapper ---------
 -----------------------------------
 
-function mod.projektil(particle_texture, delay, range, callback)
+function mod.schiesse_projektil(particle_texture, callback, delay, range)
+  delay = delay or 0.1
+  range = range or 100
+
   local player = mod.spieler()
   local ppos = player:get_pos()
   local dir = player:get_look_dir()
@@ -373,7 +377,7 @@ function mod.projektil(particle_texture, delay, range, callback)
 
     mod.partikel(pos, particle_texture, 20)
 
-    local node = mod.get_block(pos).name
+    local node = core.get_node(pos).name
     if node ~= 'air' and node ~= 'default:air' then
       callback(pos)
       return
@@ -393,9 +397,9 @@ end
 ---------- Global Timer ------------
 ------------------------------------
 
-function mod.timer(interval, callback)
+function mod.wiederhole_alle(interval, callback)
   if type(interval) ~= 'number' or interval <= 0 then
-    core.log('error', '[coderdojo] Ungültiges Intervall für mod.timer: ' .. tostring(interval))
+    core.log('error', '[dojo] Ungültiges Intervall für mod.timer: ' .. tostring(interval))
     return
   end
 
