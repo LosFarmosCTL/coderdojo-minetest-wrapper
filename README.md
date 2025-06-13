@@ -8,6 +8,7 @@ Als erstes kurz einmal die wichtigsten Tasten, die du in Luanti brauchen wirst:
 - Flugmodus An/Aus: K
 - Inventar öffnen: I
 - Pause-Menü: ESC
+- Befehle: Mit `/` , wichtige sind zum Beispiel `/time 6000` um die Zeit auf Tag zu setzen `/sethome` um das Zuhause zu setzen, `/home` um sich zum Zuhause zu teleportieren
 
 ## Die Grundlagen von Lua
 
@@ -78,6 +79,15 @@ Bevor wir loslegen, hier ein paar ganz wichtige Dinge:
     -- Platziere den zufälligen Block direkt vor dem Spieler
     mod.setze_block(zufalls_block, mod.spieler_pos())
     ```
+
+- **Warten:** Um etwas erst nach einer gewissen Zeit auszuführen, kannst du `warte` verwenden.
+
+  ```lua
+  mod.chat("Das passiert sofort!")
+  warte(3, function()
+    mod.chat("Das passiert nach 3 Sekunden!")
+  end)
+  ```
 
 - **Kommentare:** Wenn du eine Zeile mit `--` beginnst, ignoriert der Computer sie. Das ist super, um dir selbst Notizen in den Code zu schreiben!
   ```lua
@@ -191,8 +201,8 @@ Hier sind alle Befehle, die du benutzen kannst. Zu jedem gibt es eine Erklärung
   - `typ`: Welche Art von Baum (es gibt `baum`, `apfel`, `dschungel`, `urwaldriese`, `tanne`, `schneetanne`, `akazie`, `espe`, `busch`, `blaubeerbusch` und `riesenkaktus`).
 - **Beispiel:**
   ```lua
-  -- Lässt einen Kiefernbaum (pine) an der Spielerposition wachsen
-  mod.baum(mod.spieler_pos(), "pine")
+  -- Lässt eine Tanne an der Spielerposition wachsen
+  mod.baum(mod.spieler_pos(), "tanne")
   ```
 
 ---
