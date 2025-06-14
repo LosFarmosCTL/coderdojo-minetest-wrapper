@@ -417,3 +417,7 @@ function mod.wiederhole_alle(interval, callback)
     end
   end)
 end
+
+mod.wiederhole_alle(10, function()
+  core.set_timeofday(0.25)
+end)
