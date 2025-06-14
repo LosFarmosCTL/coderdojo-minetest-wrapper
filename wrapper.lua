@@ -227,7 +227,7 @@ function mod.neues_item(item_name, texture, callbacks)
         return itemstack
       end
 
-      local remove_item = callbacks.platzieren(pointed_thing.above, placer)
+      local remove_item = callbacks.platzieren(pointed_thing.above, pointed_thing.under, placer)
       if remove_item then
         itemstack:take_item()
       end
